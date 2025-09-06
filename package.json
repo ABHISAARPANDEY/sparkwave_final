@@ -8,7 +8,10 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "wrangler pages deploy dist",
+    "deploy:preview": "wrangler pages deploy dist --env preview",
+    "pages:dev": "wrangler pages dev dist --compatibility-date=2024-01-15"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
