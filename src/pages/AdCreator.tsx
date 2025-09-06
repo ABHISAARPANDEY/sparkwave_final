@@ -186,37 +186,24 @@ const AdCreator = () => {
     try {
       const selectedVideoType = videoTypes.find(t => t.id === adData.videoType);
       
-      if (adData.videoType === 'product-ad') {
-        // For product ads, use image-to-video generation
-        if (!adData.productInfo || !adData.selectedAssets.image) {
-          toast.error('Please select a product image first');
-          setLoading(false);
-          return;
-        }
-
-        console.log('🎬 Creating product video with image-to-video generation...');
+      // All video types now use Veo3 Fast for 8-second video generation
+      const useVeo3 = true; // All video types now use Veo3 Fast
+      
+      if (useVeo3) {
+        console.log('🎬 Creating 8-second video with KIE AI Veo3 Fast...');
         
         // Validate and correct spelling in the script first
         const correctedScript = await aiService.validateScriptSpelling(adData.selectedScript);
         console.log('📝 Using corrected script:', correctedScript);
         
-        // First try the alternative model
-        let videoUrl;
-        try {
-          videoUrl = await aiService.generateVideoWithAlternativeModel(
-            `Product video: ${correctedScript}`
-          );
-        } catch (error) {
-          console.log('🔄 Alternative model failed, using regular product video generation...');
-          videoUrl = await aiService.generateProductVideo(
-            adData.selectedAssets.image,
-            correctedScript,
-            adData.productAdType || 'lifestyle'
-          );
-        }
+        // Create a video prompt based on the script and video type
+        const videoPrompt = `Create a ${selectedVideoType?.name.toLowerCase()} video: ${correctedScript}`;
         
-        console.log('✅ Product video generated:', videoUrl);
-        toast.success('Product video created successfully!');
+        // Use Veo3 Fast for 8-second video generation
+        const videoUrl = await aiService.generateVeo3FastVideo(videoPrompt);
+        
+        console.log('✅ Video generated:', videoUrl);
+        toast.success('8-second video ad created successfully!');
         
         // Store the video URL in the ad data
         setAdData(prev => ({ 
@@ -225,43 +212,7 @@ const AdCreator = () => {
           selectedAssets: { ...prev.selectedAssets, video: videoUrl }
         }));
         
-        toast.success('Video generated! Check the preview panel to see your video.');
-        
-      } else {
-        // For other video types, use regular text-to-video generation
-        const useVeo3 = ['avatar-video', 'character-vlog', 'normal-video', 'tutorial', 'testimonial'].includes(adData.videoType);
-        
-        if (useVeo3) {
-          console.log('🎬 Creating video with KIE AI Veo3...');
-          
-          // Validate and correct spelling in the script first
-          const correctedScript = await aiService.validateScriptSpelling(adData.selectedScript);
-          console.log('📝 Using corrected script:', correctedScript);
-          
-          // Create a video prompt based on the script and video type
-          const videoPrompt = `Create a ${selectedVideoType?.name.toLowerCase()} video: ${correctedScript}`;
-          
-          // First try the alternative model
-          let videoUrl;
-          try {
-            videoUrl = await aiService.generateVideoWithAlternativeModel(videoPrompt);
-          } catch (error) {
-            console.log('🔄 Alternative model failed, using regular Veo3 Fast...');
-            videoUrl = await aiService.generateVeo3FastVideo(videoPrompt);
-          }
-          
-          console.log('✅ Video generated:', videoUrl);
-          toast.success('Video ad created successfully!');
-          
-          // Store the video URL in the ad data
-          setAdData(prev => ({ 
-            ...prev, 
-            videos: [...prev.videos, videoUrl],
-            selectedAssets: { ...prev.selectedAssets, video: videoUrl }
-          }));
-          
-          toast.success('Video generated! Check the preview panel to see your video.');
-        }
+        toast.success('8-second video generated! Check the preview panel to see your video.');
       }
       
     } catch (error) {
@@ -648,20 +599,23 @@ const AdCreator = () => {
 
             <div className="text-center">
               {!adData.selectedAssets.video ? (
-                <Button
-                  onClick={handleCreateVideo}
-                  disabled={loading || !adData.selectedScript || (adData.videoType === 'product-ad' && (!adData.selectedAssets.image || !adData.productAdType))}
-                  variant="neon"
-                  size="lg"
-                  className="w-full max-w-md"
-                >
-                  {loading ? (
-                    <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
-                  ) : (
-                    <Sparkles className="w-5 h-5 mr-2" />
-                  )}
-                  {loading ? 'Creating Video...' : 'Create Video Ad'}
-                </Button>
+                <div className="space-y-4">
+                  <Button
+                    onClick={handleCreateVideo}
+                    disabled={loading || !adData.selectedScript || (adData.videoType === 'product-ad' && (!adData.selectedAssets.image || !adData.productAdType))}
+                    variant="neon"
+                    size="lg"
+                    className="w-full max-w-md"
+                  >
+                    {loading ? (
+                      <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-5 h-5 mr-2" />
+                    )}
+                    {loading ? 'Creating 8-Second Video...' : 'Create 8-Second Video Ad'}
+                  </Button>
+                  
+                </div>
               ) : (
                 <div className="space-y-4">
                   <div className="aspect-video bg-muted/20 rounded-lg overflow-hidden border border-border">

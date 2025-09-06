@@ -706,50 +706,7 @@ class AIService {
     return await this.pollForVideoCompletion(taskId);
   }
 
-  // Generate longer video by creating multiple segments
-  async generateLongerVideo(prompt: string, targetDuration: number = 15): Promise<string> {
-    if (!this.kieApiKey) {
-      throw new Error('KIE.AI API key not configured.');
-    }
 
-    console.log(`🎬 Generating longer video (target: ${targetDuration}s)...`);
-
-    // Split the prompt into segments for longer video
-    const segments = this.splitPromptIntoSegments(prompt, targetDuration);
-    
-    try {
-      // Generate the first segment
-      const firstSegment = await this.generateVeo3FastVideo(segments[0]);
-      console.log('✅ First segment generated:', firstSegment);
-      
-      // For now, return the first segment
-      // In a full implementation, you would:
-      // 1. Generate multiple segments
-      // 2. Use a video processing service to combine them
-      // 3. Add transitions between segments
-      
-      return firstSegment;
-      
-    } catch (error) {
-      console.error('❌ Longer video generation failed:', error);
-      // Fallback to regular generation
-      return await this.generateVeo3FastVideo(prompt);
-    }
-  }
-
-  // Split prompt into segments for longer video generation
-  private splitPromptIntoSegments(prompt: string, targetDuration: number): string[] {
-    const words = prompt.split(' ');
-    const wordsPerSegment = Math.ceil(words.length / Math.ceil(targetDuration / 8)); // Assuming 8s per segment
-    
-    const segments = [];
-    for (let i = 0; i < words.length; i += wordsPerSegment) {
-      const segment = words.slice(i, i + wordsPerSegment).join(' ');
-      segments.push(segment);
-    }
-    
-    return segments;
-  }
 
   // Alternative: Use a different model
   async generateVideoWithAlternativeModel(prompt: string): Promise<string> {
